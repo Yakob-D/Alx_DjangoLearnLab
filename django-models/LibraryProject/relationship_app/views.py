@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Book
 from .models import Library  # Ensure Library is imported
-from django.views.generic import DetailView
+from django.views.generic.detail import DetailView  # Correct import for DetailView
 
 # Function-based View to List All Books
 def list_books(request):
