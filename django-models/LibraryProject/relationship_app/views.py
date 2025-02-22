@@ -26,19 +26,19 @@ class LibraryDetailView(DetailView):
         context['books'] = self.object.books.all()  # Get all books related to the library
         return context
 
-def login(request):
+def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
+            auth_login(request, user)  # Use the imported login function
             return redirect('home')  # Redirect to a home or dashboard page
-    return render(request, 'login.html')
+    return render(request, 'relationship_app/login.html')  # Ensure this path is correct
 
-def logout(request):
-    logout(request)
-    return render(request, 'logout.html')
+def user_logout(request):
+    auth_logout(request)  # Use the imported logout function
+    return render(request, 'relationship_app/logout.html')  # Ensure this path is correct
 
 def register(request):
     if request.method == 'POST':
@@ -48,4 +48,4 @@ def register(request):
             return redirect('login')  # Redirect to login page after registration
     else:
         form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'relationship_app/register.html', {'form': form})
