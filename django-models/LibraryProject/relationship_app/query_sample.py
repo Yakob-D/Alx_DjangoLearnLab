@@ -1,10 +1,14 @@
 from .models import Author, Book, Library, Librarian
 
-author_name = 'James'
-books_filtered = Book.objects.filter(author=author_name)
+# Query all books by a specific author
+author_name = "James"
+author = Author.objects.get(name=author_name)  # Fetch the Author instance
+books_filtered = Book.objects.filter(author=author)  # Use the Author instance to filter books
 
-library_name = 'Library Name'
-books = Book.objects.filter(name=library_name)
+# List all books in a library
+library_name = "Abrehot"
+library = Library.objects.get(name=library_name)  # Fetch the Library instance
+books = library.books.all()  # Get all books related to the library
 
-librarian_name = 'Lily'
-librarian = Librarian.objects.get(name=librarian_name)
+# Retrieve the librarian for a library
+librarian = Librarian.objects.get(library=library)  # Get the Librarian instance for the Library
