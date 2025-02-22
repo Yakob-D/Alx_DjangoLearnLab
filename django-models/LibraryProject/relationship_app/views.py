@@ -26,3 +26,26 @@ class LibraryDetailView(DetailView):
         context['books'] = self.object.books.all()  # Get all books related to the library
         return context
 
+def login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')  # Redirect to a home or dashboard page
+    return render(request, 'login.html')
+
+def logout(request):
+    logout(request)
+    return render(request, 'logout.html')
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # Redirect to login page after registration
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
