@@ -1,8 +1,9 @@
 # urls.py
 from django.urls import path
 from . import views  # Import the views module
-from .views import list_books, LibraryDetailView, admin_view, librarian_view, member_view  # Import specific views
+from .views import list_books, LibraryDetailView  # Import specific views
 from django.contrib.auth.views import LoginView, LogoutView  # Import built-in views
+
 
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),  # Use Django's built-in LoginView
