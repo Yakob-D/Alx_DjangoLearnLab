@@ -7,6 +7,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
+from django.contrib.auth.forms import UserCreationForm
+from .models import Book, Library  # Import your models
+from django.views.generic.detail import DetailView
 
 # Function-based View to List All Books
 def list_books(request):
