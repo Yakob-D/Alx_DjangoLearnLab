@@ -6,6 +6,7 @@ from django.contrib.auth.views import LoginView, LogoutView  # Import built-in v
 from .admin_view import Admin
 from .librarian_view import Librarian
 from .member_view import Member
+from .views import add_book, edit_book, delete_book
 
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),  # Use Django's built-in LoginView
@@ -16,4 +17,7 @@ urlpatterns = [
     path('admin-view/', Admin, name='admin_view'),
     path('librarian_view/', Librarian, name='librarian_view'),
     path('member_view/', Member, name='member_view'),
+    path('books/add/', add_book, name='add_book'),
+    path('books/edit/<int:book_id>/', edit_book, name='edit_book'),
+    path('books/delete/<int:book_id>/', delete_book, name='delete_book'),
 ]

@@ -12,6 +12,8 @@ from django.contrib.auth import login as auth_login, authenticate, logout as aut
 from django.contrib.auth.forms import UserCreationForm
 from .models import Book, Library  # Import your models
 from django.views.generic.detail import DetailView
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import permission_required
 
 # Function-based View to List All Books
 def list_books(request):
@@ -54,3 +56,35 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'relationship_app/register.html', {'form': form})
+
+
+@permission_required('relationship_app.can_add_book')
+def add_book(request):
+    if request.method == "POST":
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')
+    else:
+        form = BookForm()
+    return render(request, 'books/add_book.html', {'form': form})
+
+@permission_required('relationship_app.can_change_book')
+def edit_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    if request.method == "POST":
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'books/edit_book.html', {'form': form, 'book': book})
+
+@permission_required('relationship_app.can_delete_book')
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    if request.method == "POST":
+        book.delete()
+        return redirect('book_list')
+    return render(request, 'books/delete_book.html', {'book': book})
