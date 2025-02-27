@@ -33,17 +33,23 @@ ALLOWED_HOSTS = []
 # Security settings
 
 # Protect against cross-site scripting (XSS) attacks
-SECURE_BROWSER_XSS_FILTER = True  
+SECURE_BROWSER_XSS_FILTER = True  # Enable the browser's XSS filtering
 
 # Using X-Frame-Options to protect against clickjacking
-X_FRAME_OPTIONS = 'DENY'  
+X_FRAME_OPTIONS = 'DENY'  # Prevents the site from being embedded in an iframe
 
 # Prevent MIME-type sniffing attacks
-SECURE_CONTENT_TYPE_NOSNIFF = True  
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Ensures browsers stick to declared content types
 
-# Ensuring cookies are secure and only sent over HTTPS
-CSRF_COOKIE_SECURE = True  
-SESSION_COOKIE_SECURE = True  
+# Cookie settings for secure transmission
+SESSION_COOKIE_SECURE = True  # Ensure session cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are only sent over HTTPS
+
+# Enforce HTTPS
+SECURE_SSL_REDIRECT = True  # Redirect all non-HTTPS requests to HTTPS
+SECURE_HSTS_SECONDS = 31536000  # Instruct browsers to access only via HTTPS for one year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include all subdomains in HSTS policy
+SECURE_HSTS_PRELOAD = True  # Allow preloading of the HSTS policy
 
 # Application definition
 
