@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.views.generic.detail import DetailView
 from django.conf import settings  # Updated import for custom user model
 from .models import Book, Library, UserProfile  # Ensure UserProfile is imported
+
 # Function-based View to List All Books
 def list_books(request):
     books = Book.objects.all()
@@ -50,25 +51,26 @@ def register(request):
 @permission_required('relationship_app.can_add_book')
 def add_book(request):
     if request.method == "POST":
-        form = BookForm(request.POST)
-        if form.is_valid():
-            form.save()
+        # Instead of using BookForm, handle the book creation manually
+        title = request.POST.get('title')
+        author = request.POST.get('author')
+        # Add any other fields as needed
+        if title and author:  # Ensure required fields are filled
+            Book.objects.create(title=title, author=author)  # Adjust fields accordingly
             return redirect('book_list')
-    else:
-        form = BookForm()
-    return render(request, 'books/add_book.html', {'form': form})
+    return render(request, 'books/add_book.html')  # Adjust template as needed
 
 @permission_required('relationship_app.can_change_book')
 def edit_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     if request.method == "POST":
-        form = BookForm(request.POST, instance=book)
-        if form.is_valid():
-            form.save()
-            return redirect('book_list')
-    else:
-        form = BookForm(instance=book)
-    return render(request, 'books/edit_book.html', {'form': form, 'book': book})
+        # Instead of using BookForm, update the book directly
+        book.title = request.POST.get('title', book.title)
+        book.author = request.POST.get('author', book.author)
+        # Add any other fields as needed
+        book.save()
+        return redirect('book_list')
+    return render(request, 'books/edit_book.html', {'book': book})
 
 @permission_required('relationship_app.can_delete_book')
 def delete_book(request, book_id):

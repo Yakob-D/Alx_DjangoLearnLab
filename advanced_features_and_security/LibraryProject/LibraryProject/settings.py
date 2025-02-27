@@ -15,19 +15,35 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Custom user model
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: Keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-v2b^6(mv+vb7@syar)7urf%2xqk*x*0m73kcmirqo8k)fxp_ur'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Setting DEBUG to False for production environments
+DEBUG = False
 
+# Allowed hosts for production (update this in production)
 ALLOWED_HOSTS = []
 
+# Security settings
+
+# Protect against cross-site scripting (XSS) attacks
+SECURE_BROWSER_XSS_FILTER = True  
+
+# Using X-Frame-Options to protect against clickjacking
+X_FRAME_OPTIONS = 'DENY'  
+
+# Prevent MIME-type sniffing attacks
+SECURE_CONTENT_TYPE_NOSNIFF = True  
+
+# Ensuring cookies are secure and only sent over HTTPS
+CSRF_COOKIE_SECURE = True  
+SESSION_COOKIE_SECURE = True  
 
 # Application definition
 
@@ -39,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bookshelf',
+    'csp',  # Added CSP middleware package for Content Security Policy
 ]
 
 MIDDLEWARE = [
@@ -49,7 +66,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',  # Added CSP Middleware for extra security
 ]
+
+# Content Security Policy (CSP) settings
+# Restricting sources for security
+CSP_DEFAULT_SRC = ("'self'",)  
+CSP_SCRIPT_SRC = ("'self'", 'https://trusted.cdn.com')  
+CSP_IMG_SRC = ("'self'", 'data:')  
 
 ROOT_URLCONF = 'LibraryProject.urls'
 
@@ -71,8 +95,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LibraryProject.wsgi.application'
 
-
-# Database
+# Database configuration
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
@@ -81,7 +104,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -101,8 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
+# Internationalization settings
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
@@ -112,7 +133,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
