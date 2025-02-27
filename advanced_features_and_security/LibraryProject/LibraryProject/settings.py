@@ -51,6 +51,9 @@ SECURE_HSTS_SECONDS = 31536000  # Instruct browsers to access only via HTTPS for
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include all subdomains in HSTS policy
 SECURE_HSTS_PRELOAD = True  # Allow preloading of the HSTS policy
 
+# If your application is behind a proxy, set this to ensure proper handling of HTTPS requests
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Application definition
 
 INSTALLED_APPS = [
