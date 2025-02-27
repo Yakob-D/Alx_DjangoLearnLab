@@ -3,6 +3,7 @@
 from django.shortcuts import render
 from .models import Book
 from .forms import BookForm  # Ensure you're importing the correct form
+from .forms import ExampleForm
 
 def book_list(request):
     books = Book.objects.all()
