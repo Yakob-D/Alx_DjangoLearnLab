@@ -2,13 +2,13 @@ from django.shortcuts import render
 from rest_framework import generics
 from .serializers import BookSerializer
 from .models import Book
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
-# View to list books after filtering the data based on the title, read-only access given to any user
+# View to list books after filtering the data based on the title, read-only access given to un authenticated users
 class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
-    permission_class = [AllowAny]
+    permission_class = [IsAuthenticatedOrReadOnly]
 
     def get_querset(self):
         current_title = self.request.query_params.get('title', None)
@@ -16,11 +16,11 @@ class BookListView(generics.ListAPIView):
             return Book.objects.filter(title = current_title)
         return Book.objects.all()
 
-# View to retrieve a single book based on the ID, read-only access given to any user
+# View to retrieve a single book based on the ID, read-only access given to any un authenticated users
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serialzier_class = BookSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 # View to create books and push the data on to the database after validation, access given to authenticated users only
 class BookCreateView(generics.CreateAPIView):
