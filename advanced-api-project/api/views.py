@@ -6,6 +6,107 @@ from .serializers import BookSerializer
 from .models import Book
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
+from rest_framework.test import APITestCase
+from rest_framework import status
+from django.contrib.auth.models import User
+from .models import Book
+
+class BookAPITestCase(APITestCase):
+
+    def setUp(self):
+        """Set up test data"""
+        # Create test users
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.admin = User.objects.create_superuser(username="admin", password="adminpassword")
+
+        # Create sample books
+        self.book1 = Book.objects.create(title="Django Basics", author="John Doe", publication_year=2020)
+        self.book2 = Book.objects.create(title="Advanced Django", author="Jane Smith", publication_year=2021)
+        self.book3 = Book.objects.create(title="Django REST", author="John Doe", publication_year=2019)
+
+        # Define API endpoints
+        self.book_list_url = "/api/books/"
+        self.book_detail_url = f"/api/books/{self.book1.id}/"
+
+    def test_list_books(self):
+        """Test retrieving the list of books (unauthenticated users should have access)"""
+        response = self.client.get(self.book_list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)  # Check if all books are returned
+
+    def test_filter_books_by_title(self):
+        """Test filtering books by title"""
+        response = self.client.get(self.book_list_url, {"title": "Django Basics"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["title"], "Django Basics")
+
+    def test_search_books_by_author(self):
+        """Test searching books by author"""
+        response = self.client.get(self.book_list_url, {"search": "John Doe"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)  # Two books by John Doe
+
+    def test_order_books_by_publication_year(self):
+        """Test ordering books by publication year (ascending)"""
+        response = self.client.get(self.book_list_url, {"ordering": "publication_year"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["publication_year"], 2019)  # Oldest book first
+
+    def test_order_books_by_publication_year_desc(self):
+        """Test ordering books by publication year (descending)"""
+        response = self.client.get(self.book_list_url, {"ordering": "-publication_year"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["publication_year"], 2021)  # Newest book first
+
+    def test_create_book_unauthorized(self):
+        """Test that unauthenticated users cannot create books"""
+        data = {"title": "New Book", "author": "Author", "publication_year": 2023}
+        response = self.client.post(self.book_list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_book_authenticated(self):
+        """Test that authenticated users can create books"""
+        self.client.login(username="testuser", password="testpassword")
+        data = {"title": "New Book", "author": "Author", "publication_year": 2023}
+        response = self.client.post(self.book_list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Book.objects.count(), 4)  # Check if new book is added
+
+    def test_retrieve_book_detail(self):
+        """Test retrieving a book by ID"""
+        response = self.client.get(self.book_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Django Basics")
+
+    def test_update_book_unauthorized(self):
+        """Test that unauthenticated users cannot update a book"""
+        data = {"title": "Updated Title"}
+        response = self.client.put(self.book_detail_url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_book_authenticated(self):
+        """Test that authenticated users can update books"""
+        self.client.login(username="testuser", password="testpassword")
+        data = {"title": "Updated Django Basics", "author": "John Doe", "publication_year": 2020}
+        response = self.client.put(self.book_detail_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.book1.refresh_from_db()
+        self.assertEqual(self.book1.title, "Updated Django Basics")
+
+    def test_delete_book_unauthorized(self):
+        """Test that unauthenticated users cannot delete a book"""
+        response = self.client.delete(self.book_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_book_authenticated(self):
+        """Test that authenticated users can delete a book"""
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.delete(self.book_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Book.objects.count(), 2)  # One book should be deleted
+
+
 # View to list books with filtering, searching, and ordering.
 # Unauthenticated users have read-only access.
 class BookListView(generics.ListAPIView):
