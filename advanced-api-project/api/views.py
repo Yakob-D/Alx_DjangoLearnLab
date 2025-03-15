@@ -1,21 +1,18 @@
 from django.shortcuts import render
 from rest_framework import generics
 from .serializers import BookSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 
 # View to list books after filtering the data based on the title, read-only access given to un authenticated users
 class BookListView(generics.ListAPIView):
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_class = [IsAuthenticatedOrReadOnly]
-
-    def get_querset(self):
-        current_title = self.request.query_params.get('title', None)
-        if current_title:
-            return Book.objects.filter(title = current_title)
-        return Book.objects.all()
-
+    filer_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'author', 'publication_year']
 # View to retrieve a single book based on the ID, read-only access given to any un authenticated users
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
