@@ -2,7 +2,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from .forms import UserUpdateForm
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
+@method_decorator(login_required, name='dispatch')
 class ProfileView(LoginRequiredMixin, View):
     template_name = 'blog/profile.html'
 
