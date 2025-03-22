@@ -8,6 +8,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 from django.urls import reverse_lazy
+from django.db.models import Q
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(LoginRequiredMixin, View):
@@ -110,3 +111,16 @@ class CommentDeleteView(LoginRequiredMixin, DeleteView):
         return Comment.objects.filter(author=self.request.user)
     def get_success_url(self):
         return reverse_lazy('post_detail', kwargs={'post_id': self.object.post.id})
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    results = []
+
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) | 
+            Q(content__icontains=query) | 
+            Q(tags__name__icontains=query)
+        ).distinct()
+    
+    return render(request, 'blog/search_results.html', {'results': results, 'query': query})
