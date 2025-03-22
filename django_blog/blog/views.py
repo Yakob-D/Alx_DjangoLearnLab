@@ -5,7 +5,7 @@ from .forms import UserUpdateForm
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 from .forms import PostForm, CommentForm
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -124,3 +124,20 @@ def search_posts(request):
         ).distinct()
     
     return render(request, 'blog/search_results.html', {'results': results, 'query': query})
+
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_by_tag.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        tag_slug = self.kwargs['tag_slug']
+        tag = Tag.objects.get(slug=tag_slug)
+        return Post.objects.filter(tags=tag)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag_slug = self.kwargs['tag_slug']
+        tag = Tag.objects.get(slug=tag_slug)
+        context['tag'] = tag
+        return context
