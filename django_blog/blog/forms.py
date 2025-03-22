@@ -18,7 +18,7 @@ class UserUpdateForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
-        widget=forms.CheckboxSelectMultiple,  # This or another suitable widget
+        widget=forms.CheckboxSelectMultiple,  # Using checkbox selection for tags
         required=False
     )
 
@@ -28,7 +28,7 @@ class PostForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.Textarea(attrs={'class': 'form-control'}),
-            'tags': forms.CheckboxSelectMultiple(),  # Ensure this is explicitly set
+            'tags': forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),  # Ensure this part is properly defined
         }
 
     def save(self, commit=True, user=None):
@@ -38,7 +38,7 @@ class PostForm(forms.ModelForm):
             post.author = user
         if commit:
             post.save()
-            self.save_m2m()  # Ensures tags are saved in the many-to-many field
+            self.save_m2m()  # Make sure many-to-many relationships (tags) are saved
         return post
 
 class CommentForm(forms.ModelForm):
