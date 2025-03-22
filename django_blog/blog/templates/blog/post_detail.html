@@ -1,0 +1,27 @@
+<!-- blog/templates/blog/post_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'post-list' %}">Home</a></li>
+                <li><a href="{% url 'post-update' post.pk %}">Edit</a></li>
+                <li><a href="{% url 'post-delete' post.pk %}">Delete</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content">
+        <h2>{{ post.title }}</h2>
+        <p><strong>Author:</strong> {{ post.author.username }} | <strong>Created on:</strong> {{ post.created_at }}</p>
+        <p>{{ post.content }}</p>
+        
+        <hr>
+        <a href="{% url 'post-list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 My Blog</p>
+    </footer>
+{% endblock %}

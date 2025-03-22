@@ -1,0 +1,35 @@
+<!-- blog/templates/blog/post_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'post-list' %}">Home</a></li>
+                <li><a href="{% url 'post-create' %}">Create Post</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content">
+        <h2>All Blog Posts</h2>
+
+        <div class="post-list">
+            {% for post in posts %}
+                <div class="post">
+                    <h3><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h3>
+                    <p>{{ post.content|slice:":100" }}...</p>  <!-- Show first 100 characters -->
+                    <p><strong>Author:</strong> {{ post.author.username }} | <strong>Created on:</strong> {{ post.created_at }}</p>
+                </div>
+            {% empty %}
+                <p>No posts available.</p>
+            {% endfor %}
+        </div>
+
+        <a href="{% url 'post-create' %}" class="btn btn-primary">Create New Post</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 My Blog</p>
+    </footer>
+{% endblock %}
