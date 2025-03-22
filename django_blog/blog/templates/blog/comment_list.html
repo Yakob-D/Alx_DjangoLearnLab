@@ -1,0 +1,41 @@
+<!-- comments/comment_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comments</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content">
+        <h2>Comments</h2>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <p><strong>{{ comment.author }}</strong> said: {{ comment.content }}</p>
+                    <p>Posted on {{ comment.created_at }}</p>
+                    {% if user == comment.author %}
+                        <a href="{% url 'edit_comment' comment.id %}">Edit</a> |
+                        <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
+</body>
+</html>
