@@ -15,10 +15,18 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = ['email']
 
+class TagWidget(forms.Widget):
+    def render(self, name, value, attrs=None, renderer=None):
+        tags = Tag.objects.all()
+        output = ''
+        for tag in tags:
+            checked = 'checked' if tag.id in value else ''
+            output += f'<label><input type="checkbox" name="{name}" value="{tag.id}" {checked}> {tag.name}</label><br>'
+        return output
+
 class PostForm(forms.ModelForm):
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.all(),
-        widget=forms.CheckboxSelectMultiple,  # Using checkbox selection for tags
+    tags = forms.CharField(
+        widget=TagWidget(),  # Use the custom TagWidget
         required=False
     )
 
@@ -28,7 +36,6 @@ class PostForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.Textarea(attrs={'class': 'form-control'}),
-            'tags': forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),  # Ensure this part is properly defined
         }
 
     def save(self, commit=True, user=None):
@@ -38,7 +45,15 @@ class PostForm(forms.ModelForm):
             post.author = user
         if commit:
             post.save()
-            self.save_m2m()  # Make sure many-to-many relationships (tags) are saved
+
+            # Save tags
+            if self.cleaned_data['tags']:
+                tags = self.cleaned_data['tags'].split(',')
+                for tag_name in tags:
+                    tag, created = Tag.objects.get_or_create(name=tag_name.strip())
+                    post.tags.add(tag)
+
+            post.save()
         return post
 
 class CommentForm(forms.ModelForm):
