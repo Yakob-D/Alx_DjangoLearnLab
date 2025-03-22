@@ -16,10 +16,7 @@ class UserUpdateForm(forms.ModelForm):
         fields = ['email']
 
 class PostForm(forms.ModelForm):
-    tags = forms.CharField(
-        required=False,
-        help_text="Enter tags separated by commas"
-    )
+    tags = forms.CharField(required=False, help_text="Enter tags separated by commas")
 
     class Meta:
         model = Post
@@ -30,22 +27,16 @@ class PostForm(forms.ModelForm):
 
         if user:
             post.author = user
-
         if commit:
             post.save()
-            self.save_tags(post)
+            self.save_m2m()  # Required for many-to-many fields
+
+        # Handle tag creation
+        tags_list = self.cleaned_data.get('tags', '')
+        if tags_list:
+            post.tags.set([tag.strip() for tag in tags_list.split(',')])
 
         return post
-
-    def save_tags(self, post):
-        """Handles creating or associating tags with the post."""
-        tag_names = self.cleaned_data['tags']
-        tag_list = [tag.strip() for tag in tag_names.split(',') if tag.strip()]
-
-        post.tags.clear()  # Remove old tags
-        for tag_name in tag_list:
-            tag, created = Tag.objects.get_or_create(name=tag_name)
-            post.tags.add(tag)
 
 class CommentForm(forms.ModelForm):
     class Meta:
