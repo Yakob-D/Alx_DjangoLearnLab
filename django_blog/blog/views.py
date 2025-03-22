@@ -75,7 +75,7 @@ class CommentListView(ListView):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
         return Comment.objects.filter(post=post).order_by('-created_at')
 
-class PostCommentView(LoginRequiredMixin, View):
+class CommentCreateView(LoginRequiredMixin, View):
     login_url = '/login/'
 
     def post(self, request, post_id):
