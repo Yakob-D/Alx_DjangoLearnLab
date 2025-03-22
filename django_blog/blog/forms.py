@@ -16,11 +16,20 @@ class UserUpdateForm(forms.ModelForm):
         fields = ['email']
 
 class PostForm(forms.ModelForm):
-    tags = forms.CharField(required=False, help_text="Enter tags separated by commas")
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple,  # This or another suitable widget
+        required=False
+    )
 
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control'}),
+            'tags': forms.CheckboxSelectMultiple(),  # Ensure this is explicitly set
+        }
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
@@ -29,13 +38,7 @@ class PostForm(forms.ModelForm):
             post.author = user
         if commit:
             post.save()
-            self.save_m2m()  # Required for many-to-many fields
-
-        # Handle tag creation
-        tags_list = self.cleaned_data.get('tags', '')
-        if tags_list:
-            post.tags.set([tag.strip() for tag in tags_list.split(',')])
-
+            self.save_m2m()  # Ensures tags are saved in the many-to-many field
         return post
 
 class CommentForm(forms.ModelForm):
