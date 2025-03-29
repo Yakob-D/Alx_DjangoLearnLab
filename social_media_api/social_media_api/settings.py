@@ -35,6 +35,12 @@ REST_FRAMEWORK = {
     ]
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # Number of posts/comments per page
+}
+
+
 # Application definition
 
 INSTALLED_APPS = [
