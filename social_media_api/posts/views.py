@@ -7,6 +7,13 @@ from rest_framework import status
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from .models import Post, Like
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
 
 CustomUser = get_user_model()
@@ -67,3 +74,35 @@ class PostFeedViewSet(viewsets.GenericViewSet):
         posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+class LikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if created:
+            # Create a notification for the post author
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb="liked your post",
+                target_content_type=ContentType.objects.get_for_model(post),
+                target_object_id=post.id
+            )
+            return Response({"message": "Post liked"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "You already liked this post"}, status=status.HTTP_400_BAD_REQUEST)
+
+class UnlikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.filter(user=request.user, post=post)
+
+        if like.exists():
+            like.delete()
+            return Response({"message": "Post unliked"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "You haven't liked this post"}, status=status.HTTP_400_BAD_REQUEST)
