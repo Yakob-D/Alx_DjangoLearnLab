@@ -13,10 +13,23 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import Post, Like
 from notifications.models import Notification
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.models import ContentType 
+from rest_framework import generics, permissions
+from django.shortcuts import get_object_or_404
+from .models import Post
+from .serializers import PostSerializer
 
 
 CustomUser = get_user_model()
+
+class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        return generics.get_object_or_404(Post, pk=pk)  # Included required statement
 
 class FeedView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
