@@ -33,3 +33,14 @@ class CommentViewSet(viewsets.ModelViewSet):
             # Only allow users to edit or delete their own comments
             self.permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
         return super().get_permissions()
+
+class PostFeedViewSet(viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=['get'])
+    def feed(self, request):
+        # Get posts from users that the current user follows
+        followed_users = request.user.following.all()
+        posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
