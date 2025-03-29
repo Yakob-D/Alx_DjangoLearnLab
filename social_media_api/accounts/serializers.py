@@ -24,13 +24,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
+        validated_data.pop('password2')  # Remove password2 as it's not needed for creation
+        user = User.objects.create_user(**validated_data)  # Explicitly using create_user
+        Token.objects.create(user=user)  # Ensure a token is created
         return user
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        return data

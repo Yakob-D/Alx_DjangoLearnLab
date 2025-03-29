@@ -16,7 +16,7 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         user = User.objects.get(username=request.data['username'])
-        token, _ = Token.objects.get_or_create(user=user)
+        token = Token.objects.create(user=user)  # Explicit token creation
         return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
 
 class LoginView(generics.GenericAPIView):
@@ -29,14 +29,7 @@ class LoginView(generics.GenericAPIView):
         user = authenticate(username=serializer.validated_data['username'], password=serializer.validated_data['password'])
         
         if user:
-            token, _ = Token.objects.get_or_create(user=user)
+            Token.objects.filter(user=user).delete()  # Ensure only one active token per user
+            token = Token.objects.create(user=user)  # Explicitly create a new token
             return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_200_OK)
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-class ProfileView(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
